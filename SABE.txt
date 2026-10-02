@@ -1,0 +1,1312 @@
+--[[
+  Savagex Hub ALL-IN-ONE
+]]
+print("[Savagex] Hub loading...")
+
+if not game:IsLoaded() then
+ repeat task.wait() until game:IsLoaded()
+end
+if not (game.PlaceId == 104715542330896 or game.PlaceId == 97556409405464) then
+ return
+end
+local function LoadSavagexHub()
+if not game:IsLoaded() then
+ repeat task.wait() until game:IsLoaded()
+end
+if not (game.PlaceId == 104715542330896 or game.PlaceId == 97556409405464) then
+ return
+end
+pcall(function()
+ local RS = game:GetService("ReplicatedStorage")
+ local TransitionModule = require(RS.Modules.Game.UI.TransitionUI)
+ local old_transition = TransitionModule.transition
+ TransitionModule.transition = function(p_in, p_wait, p_out, noLogo)
+  if old_transition then
+   return old_transition(p_in, p_wait, p_out, noLogo)
+  end
+ end
+end)
+pcall(function()
+ local RS = game:GetService("ReplicatedStorage")
+ local CharCreator = require(RS.Modules.Game.CharacterCreator.CharacterCreator)
+ if CharCreator.start then
+  local old_start = CharCreator.start
+  CharCreator.start = function(...)
+   while true do task.wait(1) end
+  end
+ end
+ if CharCreator.load_page then
+  local old_load = CharCreator.load_page
+  CharCreator.load_page = function(...) return old_load(...) end
+ end
+ if CharCreator.initiate then
+  local old_initiate = CharCreator.initiate
+  CharCreator.initiate = function(...) return old_initiate(...) end
+ end
+end)
+pcall(function()
+ if getgenv then getgenv().identifyexecutor = nil end
+end)
+pcall(function()
+ if getfenv then
+  local env = getfenv()
+  env.identifyexecutor = nil
+ end
+end)
+local v_u_1 = {}
+local v2 = game.ReplicatedStorage:WaitForChild("Remotes")
+local v_u_3 = {
+ send = v2:WaitForChild("Send"),
+ get = v2:WaitForChild("Get")
+}
+local v_u_4 = { event = 0, func = 0 }
+local v_u_5 = {}
+local v_u_6 = false
+local v_u_7 = {}
+function v_u_1.on_connect(p8)
+ if v_u_6 then
+  p8()
+ else
+  v_u_7[#v_u_7 + 1] = p8
+ end
+end
+function v_u_1.hook(p_u_9, p_u_10)
+ if not p_u_10 then
+  error("Function nil for hook " .. p_u_9)
+ end
+ if v_u_6 then
+  if v_u_5[p_u_9] then
+   warn("Overwriting hook '" .. p_u_9 .. "'.")
+  else
+   v_u_5[p_u_9] = p_u_10
+  end
+ else
+  v_u_1.on_connect(function()
+   v_u_1.hook(p_u_9, p_u_10)
+  end)
+  return
+ end
+end
+function v_u_1.is_connected(p11)
+ return p11:GetAttribute("IsConnected") and true or false
+end
+local function v_u_19(p12, p13, p14, p15, ...)
+ return p12(p13, p14, p15, ...)
+end
+task.wait(0.05)
+local v_u_20 = v_u_3.send
+local v_u_21 = v_u_3.send.FireServer
+function v_u_1.send(p22, ...)
+ v_u_4.event = v_u_4.event + 1
+ v_u_21(v_u_20, v_u_4.event, p22, ...)
+end
+local v_u_23 = v_u_3.get
+local v_u_24 = v_u_3.get.InvokeServer
+function v_u_1.get(p25, ...)
+ v_u_4.func = v_u_4.func + 1
+ return v_u_24(v_u_23, v_u_4.func, p25, ...)
+end
+task.wait(0.05)
+local function v_u_29()
+ v_u_3.send.OnClientEvent:Connect(function(p26, ...)
+  if v_u_5[p26] then
+   v_u_5[p26](...)
+  else
+   error("Invalid hook '" .. p26 .. "' fired!", 0)
+  end
+ end)
+ function v_u_3.get.OnClientInvoke(p27, ...)
+  if v_u_5[p27] then
+   return v_u_5[p27](...)
+  end
+  error("Invalid hook '" .. p27 .. "' invoked!", 0)
+ end
+ if not pcall(function()
+  for v28 = 1, #v_u_7 do
+   v_u_7[v28]()
+  end
+ end) then
+  pcall(function()
+   print("On connect failed for client")
+   v_u_1.send("issue", "On connect failed for client")
+  end)
+ end
+end
+function v_u_1.initiate() end
+function v_u_1.loaded()
+ function v_u_3.get.OnClientInvoke(p30)
+  if p30 == "connect" then
+   v_u_6 = true
+   v_u_29()
+   return true
+  end
+ end
+ v_u_1.hook("ping", function() return true end)
+end
+print("bypassed")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local HttpService = game:GetService("HttpService")
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Debris = game:GetService("Debris")
+local CoreGui = game:GetService("CoreGui")
+local CurrentCamera = workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
+local Client = LocalPlayer
+local UserId = Client.UserId
+local PlayerGui = Client:WaitForChild("PlayerGui")
+local Net = require(ReplicatedStorage.Modules.Core.Net)
+local RagdollModule = require(ReplicatedStorage.Modules.Game.Ragdoll)
+local Vechine = require(ReplicatedStorage.Modules.Game.VehicleSystem.Vehicle)
+local CharModule = require(ReplicatedStorage.Modules.Core.Char)
+local SprintModule = require(ReplicatedStorage.Modules.Game.Sprint)
+local CrateController = require(ReplicatedStorage.Modules.Game.CrateSystem.Crate)
+local Settings = {}
+local function c()
+ return Settings
+end
+local Character = Client.Character or Client.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local RootPart = Character:WaitForChild("HumanoidRootPart")
+local Backpack = Client:WaitForChild("Backpack")
+Client.CharacterAdded:Connect(function(newCharacter)
+ Character = newCharacter
+ Humanoid = Character:WaitForChild("Humanoid")
+ RootPart = Character:WaitForChild("HumanoidRootPart")
+ Backpack = Client:WaitForChild("Backpack")
+end)
+local function safeCall(fn, ...)
+ local ok, a, b, c = pcall(fn, ...)
+ if ok then return a, b, c end
+ return nil
+end
+local function permanentLoop(interval, fn)
+ task.spawn(function()
+  local waitTime = math.max(interval or 0.25, 0.12)
+  while true do
+   local ok, err = pcall(fn)
+   if not ok then
+    task.wait(math.max(waitTime * 1.5, 0.4))
+   else
+    task.wait(waitTime)
+   end
+  end
+ end)
+end
+local function getRoot()
+ local char = LocalPlayer.Character
+ if not char then return nil end
+ return char:FindFirstChild("HumanoidRootPart")
+end
+local function getHum()
+ local char = LocalPlayer.Character
+ if not char then return nil end
+ return char:FindFirstChildOfClass("Humanoid")
+end
+local Sprint = require(ReplicatedStorage.Modules.Game.Sprint)
+local consume_stamina = Sprint.consume_stamina
+local SprintBar = nil
+pcall(function()
+ if debug and debug.getupvalue then
+  SprintBar = debug.getupvalue(consume_stamina, 2).sprint_bar
+ end
+end)
+local function safeHttpGet(url)
+ local ok, res = pcall(function()
+  if game.HttpGet then return game:HttpGet(url) end
+  return game:HttpGetAsync(url)
+ end)
+ if ok then return res end
+ ok, res = pcall(function() return game:HttpGetAsync(url) end)
+ if ok then return res end
+ return nil
+end
+local function safeLoadUrl(url)
+ local src = safeHttpGet(url)
+ if not src then return nil end
+ local ok, fn = pcall(loadstring, src)
+ if ok and fn then
+  local ok2, result = pcall(fn)
+  if ok2 then return result end
+ end
+ return nil
+end
+local safeHookfunction
+pcall(function() safeHookfunction = hookfunction end)
+if typeof(safeHookfunction) ~= "function" then
+ safeHookfunction = function(old, new)
+  return old
+ end
+end
+local function safeDrawingNew(className)
+ local ok, obj = pcall(function()
+  if typeof(Drawing) == "table" and typeof(Drawing.new) == "function" then
+   return Drawing.new(className)
+  end
+  return nil
+ end)
+ if ok and obj then return obj end
+ return nil
+end
+local WindUI = safeLoadUrl("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua")
+if not WindUI then
+ WindUI = safeLoadUrl("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua")
+end
+local Icons = safeLoadUrl("https://raw.githubusercontent.com/Footagesus/Icons/main/Main.lua")
+if not WindUI then
+ warn("[SavagexHub] WindUI failed to load")
+ return
+end
+if Icons and Icons.SetIconsType then
+ Icons.SetIconsType("lucide")
+end
+local Window = WindUI:CreateWindow({
+ Icon = "rbxassetid:// 132979933003206",
+ IconThemed = true,
+ Title = "Savagex Hub | Block Spin",
+ Author = "by 19/DEV",
+ Folder = "Savagex's",
+ Size = UDim2.fromOffset(560, 420),
+ MinSize = Vector2.new(400, 300),
+ MaxSize = Vector2.new(700, 520),
+ Transparent = true,
+ Theme = "Midnight",
+ Resizable = true,
+ SideBarWidth = 165,
+ BackgroundImageTransparency = 0.55,
+ HideSearchBar = false,
+ ScrollBarEnabled = false,
+ OpenButton = { Enabled = false }
+})
+Window:Tag({
+ Title = "V0.2",
+ Color = Color3.fromHex("#FF0000"),
+ Radius = 13
+})
+if CoreGui:FindFirstChild("SavagexHubButton") then
+ CoreGui.SavagexHubButton:Destroy()
+end
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "SavagexHubButton"
+ScreenGui.Parent = CoreGui
+ScreenGui.IgnoreGuiInset = true
+local ImageButton = Instance.new("ImageButton")
+ImageButton.Parent = ScreenGui
+ImageButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+ImageButton.BorderSizePixel = 0
+ImageButton.Position = UDim2.new(0.5, -22, 0, 10)
+ImageButton.Size = UDim2.new(0, 45, 0, 45)
+ImageButton.Image = "rbxassetid://132979933003206"
+ImageButton.ScaleType = Enum.ScaleType.Fit
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = ImageButton
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = Color3.fromRGB(59, 130, 246)
+UIStroke.Thickness = 2.5
+UIStroke.Parent = ImageButton
+local dragging = false
+local dragStart, startPos
+local hasDragged = false
+local totalDistance = 0
+local isOpen = true
+ImageButton.InputBegan:Connect(function(input)
+ if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+  dragging = true
+  dragStart = input.Position
+  startPos = ImageButton.Position
+  hasDragged = false
+  totalDistance = 0
+ end
+end)
+UserInputService.InputChanged:Connect(function(input)
+ if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+  local delta = input.Position - dragStart
+  totalDistance = math.abs(delta.X) + math.abs(delta.Y)
+  if totalDistance > 5 then hasDragged = true end
+  ImageButton.Position = UDim2.new(
+   startPos.X.Scale, startPos.X.Offset + delta.X,
+   startPos.Y.Scale, startPos.Y.Offset + delta.Y
+  )
+ end
+end)
+UserInputService.InputEnded:Connect(function(input)
+ if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+  if dragging then
+   dragging = false
+   if not hasDragged or totalDistance <= 5 then
+    isOpen = not isOpen
+    if isOpen then Window:Open() else Window:Close() end
+   end
+  end
+ end
+end)
+local MainTab = Window:Tab({ Title = "GENERAL", Icon = "globe" })
+
+-------------------------------------------------
+-- PERFIL / CUENTA (primero)
+-------------------------------------------------
+MainTab:Section({ Title = "Perfil del Jugador" })
+
+local execName = "Desconocido"
+pcall(function()
+    execName = (identifyexecutor and identifyexecutor()) or "Desconocido"
+end)
+
+pcall(function()
+    MainTab:Paragraph({
+        Title = "Perfil " .. LocalPlayer.DisplayName,
+        Desc = "Usuario: @" .. LocalPlayer.Name
+            .. "\nID: " .. LocalPlayer.UserId
+            .. "\nEdad de la cuenta: " .. LocalPlayer.AccountAge .. " dÃas",
+        Image = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=420&h=420",
+        ImageSize = 48
+    })
+end)
+
+MainTab:Paragraph({
+    Title = "Sistema",
+    Desc = "Ejecutor: " .. tostring(execName)
+        .. "\nJuego: Block Spin"
+        .. "\nPlace ID: " .. tostring(game.PlaceId)
+})
+-------------------------------------------------
+-- DINERO (despuÃ©s)
+-------------------------------------------------
+MainTab:Section({ Title = "Player Modifier:" })
+local BankBalance = MainTab:Button({ Title = "ð¦ Bank Balance", Desc = "N/A" })
+local HandBalance = MainTab:Button({ Title = "ð¸ Hand Balance", Desc = "N/A" })
+
+local function HandMoney()
+    local ok, val = pcall(function()
+        return tonumber(PlayerGui.TopRightHud.Holder.Frame.MoneyTextLabel.Text:match("%$(%d+)"))
+    end)
+    return ok and val or 0
+end
+
+local function ATMMoney()
+    for _, v in ipairs(PlayerGui:GetDescendants()) do
+        if v:IsA("TextLabel") and string.find(v.Text, "Bank Balance") then
+            return tonumber(v.Text:match("%$(%d+)")) or 0
+        end
+    end
+    return 0
+end
+
+permanentLoop(0.6, function()
+    BankBalance:SetDesc('<b><font color="#00FF00">$' .. (ATMMoney() or 0) .. "</font></b>")
+    HandBalance:SetDesc('<b><font color="#00f2ff">$' .. (HandMoney() or 0) .. "</font></b>")
+end)
+local SpeedAmount = 35
+local EnabledSpeed = false
+permanentLoop(0.25, function()
+ local hum = Humanoid
+ if not hum or not hum.Parent then
+  local char = LocalPlayer.Character
+  if char then hum = char:FindFirstChildOfClass("Humanoid") end
+ end
+ if EnabledSpeed and hum and hum.Parent then
+  Net.send("set_sprinting_1", true)
+  if SprintModule and SprintModule.sprinting and SprintModule.sprinting.set then
+   SprintModule.sprinting.set(true)
+  end
+  hum:SetAttribute("TargetWalkSpeed", SpeedAmount)
+  hum.WalkSpeed = SpeedAmount
+ end
+end)
+MainTab:Toggle({
+ Title = "Walk Speed",
+ Flag = "Walk Speed",
+ Icon = "check",
+ Type = "Checkbox",
+ Value = false,
+ Callback = function(Value)
+  EnabledSpeed = Value
+  if not Value and Humanoid and Humanoid.Parent then
+   pcall(function()
+    Humanoid:SetAttribute("TargetWalkSpeed", nil)
+    Humanoid.WalkSpeed = 16
+    Net.send("set_sprinting_1", false)
+    if SprintModule and SprintModule.sprinting and SprintModule.sprinting.set then
+     SprintModule.sprinting.set(false)
+    end
+   end)
+  end
+ end
+})
+MainTab:Slider({
+ Title = "Speed Value",
+ Flag = "speed_value",
+ Step = 1,
+ Value = { Min = 8, Max = 45, Default = SpeedAmount },
+ Callback = function(Value)
+  SpeedAmount = Value
+  if Humanoid and EnabledSpeed then Humanoid.WalkSpeed = Value end
+ end
+})
+Client.CharacterAdded:Connect(function(char)
+ Character = char
+ Humanoid = char:WaitForChild("Humanoid")
+end)
+local EnabledFlyJump = false
+MainTab:Toggle({
+ Title = "Fly Jump",
+ Flag = "Fly",
+ Icon = "check",
+ Type = "Checkbox",
+ Value = false,
+ Callback = function(Value) EnabledFlyJump = Value end
+})
+local lastFlyJump = 0
+local FLY_JUMP_COOLDOWN = 0.12
+local FLY_JUMP_POWER = 55
+local holdingSpace = false
+local function doFlyJump()
+ if not EnabledFlyJump then return end
+ local char = Client.Character
+ if not char then return end
+ local hrp = char:FindFirstChild("HumanoidRootPart")
+ local hum = char:FindFirstChildOfClass("Humanoid")
+ if not hrp or not hum or hum.Health <= 0 then return end
+ local now = tick()
+ if now - lastFlyJump < FLY_JUMP_COOLDOWN then return end
+ lastFlyJump = now
+ local vel = hrp.AssemblyLinearVelocity or Vector3.zero
+ local force = Vector3.new(vel.X, FLY_JUMP_POWER, vel.Z)
+ hrp.AssemblyLinearVelocity = force
+ pcall(function()
+  hum.UseJumpPower = true
+  hum.JumpPower = FLY_JUMP_POWER
+  hum.JumpHeight = 50
+  hum.Jump = true
+ end)
+end
+UserInputService.JumpRequest:Connect(doFlyJump)
+UserInputService.InputBegan:Connect(function(input, gpe)
+ if gpe then return end
+ if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.ButtonA then
+  holdingSpace = true
+  doFlyJump()
+ end
+end)
+UserInputService.InputEnded:Connect(function(input)
+ if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.ButtonA then
+  holdingSpace = false
+ end
+end)
+RunService.Heartbeat:Connect(function()
+ if EnabledFlyJump and holdingSpace then
+  doFlyJump()
+ end
+end)
+local EnabledSpin = false
+local SpinAngle = 0
+local SPIN_SPEED = 0.65
+local SpinConn = nil
+local function forceSpinOrientation()
+ if not EnabledSpin then return end
+ local char = Client.Character
+ if not char then return end
+ local hrp = char:FindFirstChild("HumanoidRootPart")
+ local hum = char:FindFirstChildOfClass("Humanoid")
+ if not hrp or not hrp.Parent then return end
+ if hum then
+  hum.AutoRotate = false
+ end
+ local pos = hrp.Position
+ local vel = hrp.AssemblyLinearVelocity
+ hrp.CFrame = CFrame.new(pos) * CFrame.Angles(0, SpinAngle, 0)
+ hrp.AssemblyLinearVelocity = vel
+ hrp.AssemblyAngularVelocity = Vector3.zero
+end
+local function tickSpin(dt)
+ if not EnabledSpin then return end
+ dt = dt or 0.016
+ SpinAngle = SpinAngle + (SPIN_SPEED * 60 * dt)
+ if SpinAngle > 6.283185307179586 then
+  SpinAngle = SpinAngle % 6.283185307179586
+ end
+ forceSpinOrientation()
+ task.defer(forceSpinOrientation)
+end
+local function stopSpin()
+ EnabledSpin = false
+ SpinAngle = 0
+ pcall(function() RunService:UnbindFromRenderStep("SavagexSpin") end)
+ pcall(function() RunService:UnbindFromRenderStep("SavagexSpinLate") end)
+ pcall(function() RunService:UnbindFromRenderStep("SavagexSpinCam") end)
+ if SpinConn then
+  pcall(function() SpinConn:Disconnect() end)
+  SpinConn = nil
+ end
+ local char = Client.Character
+ local hum = char and char:FindFirstChildOfClass("Humanoid")
+ if hum then
+  pcall(function() hum.AutoRotate = true end)
+ end
+end
+local function startSpin()
+ stopSpin()
+ EnabledSpin = true
+ pcall(function()
+  RunService:BindToRenderStep("SavagexSpin", Enum.RenderPriority.Character.Value + 50, function(dt)
+   tickSpin(dt)
+  end)
+ end)
+ pcall(function()
+  RunService:BindToRenderStep("SavagexSpinCam", Enum.RenderPriority.Camera.Value + 50, forceSpinOrientation)
+ end)
+ pcall(function()
+  RunService:BindToRenderStep("SavagexSpinLate", Enum.RenderPriority.Last.Value + 200, forceSpinOrientation)
+ end)
+ local _lastSpinHb = 0
+ SpinConn = RunService.Heartbeat:Connect(function(dt)
+  if not EnabledSpin then return end
+  local now = tick()
+  if now - _lastSpinHb < 0.016 then return end
+  _lastSpinHb = now
+  tickSpin(dt)
+  task.defer(forceSpinOrientation)
+ end)
+end
+MainTab:Toggle({
+ Title = "SPIN",
+ Flag = "spin",
+ Desc = "Gira sin parar (camina y apunta)",
+ Icon = "check",
+ Type = "Checkbox",
+ Value = false,
+ Callback = function(Value)
+  if Value then
+   startSpin()
+  else
+   stopSpin()
+  end
+ end
+})
+local EnabledInfiniteStamina = false
+local InfiniteStaminaToggle = nil
+InfiniteStaminaToggle = MainTab:Toggle({
+ Title = "Infinite Stamina",
+ Flag = "Inf",
+ Icon = "check",
+ Type = "Checkbox",
+ Value = false,
+ Callback = function(Value)
+  EnabledInfiniteStamina = Value
+  if Value then
+   local ok, SprintMod = pcall(function()
+    return require(ReplicatedStorage.Modules.Game.Sprint)
+   end)
+   if ok and SprintMod then
+    local consumeFn = SprintMod.consume_stamina
+    local sprintBar = nil
+    pcall(function()
+     local getuv = (debug and debug.getupvalue) or getupvalue
+     if getuv then
+      sprintBar = getuv(consumeFn, 2).sprint_bar
+     end
+    end)
+    if not sprintBar and SprintBar then
+     sprintBar = SprintBar
+    end
+    if sprintBar then
+     local originalUpdate = sprintBar.update
+     sprintBar.update = function(...)
+      return originalUpdate(function() return 1 end)
+     end
+     Settings.OriginalSprintUpdate = originalUpdate
+     Settings.AutoSprintLoop = task.spawn(function()
+      while EnabledInfiniteStamina do
+       pcall(function()
+        Net.send("set_sprinting_1", true)
+        task.wait(0.5)
+        Net.send("set_sprinting_1", false)
+       end)
+       task.wait(0.1)
+      end
+      pcall(function()
+       Net.send("set_sprinting_1", false)
+      end)
+     end)
+     WindUI:Notify({ Title = "â INF STAMINA", Duration = 3 })
+    else
+     EnabledInfiniteStamina = false
+     if InfiniteStaminaToggle and InfiniteStaminaToggle.Set then
+      pcall(function() InfiniteStaminaToggle:Set(false) end)
+     elseif InfiniteStaminaToggle and InfiniteStaminaToggle.SetValue then
+      pcall(function() InfiniteStaminaToggle:SetValue(false) end)
+     end
+    end
+   else
+    EnabledInfiniteStamina = false
+    if InfiniteStaminaToggle and InfiniteStaminaToggle.Set then
+     pcall(function() InfiniteStaminaToggle:Set(false) end)
+    elseif InfiniteStaminaToggle and InfiniteStaminaToggle.SetValue then
+     pcall(function() InfiniteStaminaToggle:SetValue(false) end)
+    end
+   end
+  else
+   if Settings.AutoSprintLoop then
+    pcall(function() task.cancel(Settings.AutoSprintLoop) end)
+    Settings.AutoSprintLoop = nil
+   end
+   pcall(function() Net.send("set_sprinting_1", false) end)
+   local ok, SprintMod = pcall(function()
+    return require(ReplicatedStorage.Modules.Game.Sprint)
+   end)
+   if ok and SprintMod then
+    local consumeFn = SprintMod.consume_stamina
+    local sprintBar = nil
+    pcall(function()
+     local getuv = (debug and debug.getupvalue) or getupvalue
+     if getuv then
+      sprintBar = getuv(consumeFn, 2).sprint_bar
+     end
+    end)
+    if not sprintBar and SprintBar then
+     sprintBar = SprintBar
+    end
+    if sprintBar and Settings.OriginalSprintUpdate then
+     sprintBar.update = Settings.OriginalSprintUpdate
+     Settings.OriginalSprintUpdate = nil
+    end
+   end
+   WindUI:Notify({ Title = "â Auto Sprint Disabled", Duration = 3 })
+  end
+ end
+})
+_G.AutoRecolectMansion = false
+local AUTO_RECOLECT_RANGE = 400
+local SAFE_TP_RANGE = 55
+local function stopAutoRecolectMovement()
+ pcall(function()
+  local char = LocalPlayer.Character
+  if not char then return end
+  local root = char:FindFirstChild("HumanoidRootPart")
+  if root then
+   root.AssemblyLinearVelocity = Vector3.zero
+   root.AssemblyAngularVelocity = Vector3.zero
+  end
+ end)
+end
+MainTab:Toggle({
+ Title = "Auto Recolect Mansion",
+ Flag = "auto_recolect_mansion",
+ Desc = "Mejor mÃ©todo - agarra todo rÃ¡pido",
+ Icon = "check",
+ Type = "Checkbox",
+ Value = false,
+ Callback = function(Value)
+  _G.AutoRecolectMansion = Value
+  if not Value then
+   stopAutoRecolectMovement()
+  end
+ end
+})
+task.spawn(function()
+ local dropfolder = workspace:FindFirstChild("DroppedItems") or workspace:WaitForChild("DroppedItems", 15)
+ while true do
+  task.wait(0.18)
+  pcall(function()
+   if not _G.AutoRecolectMansion then return end
+   if not dropfolder or not dropfolder.Parent then
+    dropfolder = workspace:FindFirstChild("DroppedItems")
+    return
+   end
+   local char = LocalPlayer.Character
+   if not char then return end
+   local root = char:FindFirstChild("HumanoidRootPart")
+   if not root then return end
+   local itemsToCollect = {}
+   for _, item in ipairs(dropfolder:GetChildren()) do
+    if not _G.AutoRecolectMansion then return end
+    if item and item.Parent and not item:GetAttribute("Locked") then
+     local zone = item:FindFirstChild("PickUpZone")
+     local part = zone or item:FindFirstChildWhichIsA("BasePart", true)
+     if part and part:IsA("BasePart") then
+      local dist = (root.Position - part.Position).Magnitude
+      if dist <= AUTO_RECOLECT_RANGE then
+       table.insert(itemsToCollect, {item = item, part = part, dist = dist, zone = zone})
+      end
+     end
+    end
+   end
+   table.sort(itemsToCollect, function(a, b) return a.dist < b.dist end)
+   for _, data in ipairs(itemsToCollect) do
+    if not _G.AutoRecolectMansion then
+     stopAutoRecolectMovement()
+     return
+    end
+    if data.zone then
+     pcall(function()
+      data.zone.Size = Vector3.new(50, 50, 50)
+      data.zone.CanCollide = false
+     end)
+    end
+    for i = 1, 4 do
+     if not _G.AutoRecolectMansion then
+      stopAutoRecolectMovement()
+      return
+     end
+     pcall(function() Net.get("pickup_dropped_item", data.item) end)
+    end
+    if not _G.AutoRecolectMansion then
+     stopAutoRecolectMovement()
+     return
+    end
+    if data.dist > 6 and data.dist <= SAFE_TP_RANGE then
+     root.CFrame = CFrame.new(data.part.Position + Vector3.new(0, 2.3, 0))
+     pcall(function() root.AssemblyLinearVelocity = Vector3.new(0, -2, 0) end)
+    end
+    task.wait(0.04)
+   end
+  end)
+ end
+end)
+MainTab:Section({ Title = "Utility:" })
+_G.AutoPickItems = false
+_G.BlacklistRarity = {}
+_G.AutoPickRange = 15
+local _RarityCache = {}
+local function GetItemRarity(dropName)
+ if _RarityCache[dropName] ~= nil then return _RarityCache[dropName] end
+ local itemsFolder = ReplicatedStorage:FindFirstChild("Items")
+ if not itemsFolder then
+  _RarityCache[dropName] = false
+  return false
+ end
+ local rarity = false
+ for _, template in ipairs(itemsFolder:GetDescendants()) do
+  if not template:IsA("ModuleScript") and not template:IsA("Folder") and template.Name == dropName then
+   rarity = template:GetAttribute("RarityName") or false
+   break
+  end
+ end
+ _RarityCache[dropName] = rarity
+ return rarity
+end
+local function IsBlacklisted(item)
+ if not item or not _G.BlacklistRarity or #_G.BlacklistRarity == 0 then return false end
+ local dropName = item:GetAttribute("ItemName") or item.Name
+ if not dropName then return false end
+ local rarity = GetItemRarity(dropName)
+ if not rarity then return false end
+ for i = 1, #_G.BlacklistRarity do
+  if _G.BlacklistRarity[i] == rarity then return true end
+ end
+ return false
+end
+local autoPickupEnabled = false
+local DroppedItems = workspace:FindFirstChild("DroppedItems") or workspace:WaitForChild("DroppedItems", 15)
+local function netGet(...)
+ return safeCall(function(...)
+  return Net.get(...)
+ end, ...)
+end
+permanentLoop(0.2, function()
+ if not autoPickupEnabled then return end
+ local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+ if not root then return end
+ if not DroppedItems or not DroppedItems.Parent then
+  DroppedItems = workspace:FindFirstChild("DroppedItems")
+ end
+ if not DroppedItems then return end
+ for _, item in ipairs(DroppedItems:GetChildren()) do
+  if item:IsA("Model") and item:FindFirstChild("PickUpZone") then
+   local okPos, pivotPos = pcall(function()
+    return item:GetPivot().Position
+   end)
+   if okPos and pivotPos and (pivotPos - root.Position).Magnitude < 50 then
+    netGet("pickup_dropped_item", item)
+   end
+  end
+ end
+end)
+MainTab:Toggle({
+ Title = "Auto Pick Item",
+ Flag = "Pickitem",
+ Desc = "Pick up items that are far away",
+ Icon = "check",
+ Type = "Checkbox",
+ Value = false,
+ Callback = function(value)
+  autoPickupEnabled = value
+  _G.AutoPickItems = value
+ end
+})
+MainTab:Dropdown({
+ Title = "Blacklist Rarity",
+ Flag = "BlacklistRarity",
+ Values = {"Common", "Uncommon", "Rare", "Epic", "Legendary"},
+ Default = {},
+ Multi = true,
+ AllowNone = true,
+ Callback = function(selected) _G.BlacklistRarity = selected end
+})
+_G.AntiLock = false
+local AntiAimAnimTrack = nil
+local ANIM_ID = "rbxassetid://104767795538635"
+local function playDanceAntiAim()
+ local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+ local humanoid = char:WaitForChild("Humanoid")
+ if AntiAimAnimTrack then
+  AntiAimAnimTrack:Stop()
+  AntiAimAnimTrack:Destroy()
+  AntiAimAnimTrack = nil
+ end
+ local anim = Instance.new("Animation")
+ anim.AnimationId = ANIM_ID
+ AntiAimAnimTrack = humanoid:LoadAnimation(anim)
+ AntiAimAnimTrack.Looped = true
+ AntiAimAnimTrack:Play()
+ AntiAimAnimTrack:AdjustSpeed(99999999999999999999999999999999999)
+end
+local function stopDanceAntiAim()
+ if AntiAimAnimTrack then
+  AntiAimAnimTrack:Stop()
+  AntiAimAnimTrack:Destroy()
+  AntiAimAnimTrack = nil
+ end
+end
+local function VelocityDesync()
+ local hrp = CharModule.get_hrp()
+ if not hrp then
+  return
+ end
+ local OldVec = hrp.Velocity
+ local Lin = hrp.AssemblyLinearVelocity
+ local Ang = hrp.AssemblyAngularVelocity
+ local RandomVec = Vector3.new(
+  math.random(-16000,16000),
+  math.random(-16000,16000),
+  math.random(-16000,16000)
+ )
+ hrp.Velocity = RandomVec
+ hrp.AssemblyLinearVelocity = RandomVec
+ hrp.AssemblyAngularVelocity = RandomVec
+ RunService.RenderStepped:Wait()
+ hrp.Velocity = OldVec
+ hrp.AssemblyLinearVelocity = Lin
+ hrp.AssemblyAngularVelocity = Ang
+end
+local function SetPhysics()
+ local hrp = CharModule.get_hrp()
+ if hrp then
+  hrp.CustomPhysicalProperties = PhysicalProperties.new(0.001, 0.001, 0.001)
+ end
+end
+local _alToggle = false
+RunService.Heartbeat:Connect(function()
+ if not _G.AntiLock then return end
+ _alToggle = not _alToggle
+ if not _alToggle then return end
+ VelocityDesync()
+ SetPhysics()
+end)
+MainTab:Toggle({
+ Title = "Anti Lock",
+ Flag = "antilock",
+ Desc = "Prevent you from Aimlock",
+ Icon = "check",
+ Type = "Checkbox",
+ Value = false,
+ Callback = function(Value)
+  _G.AntiLock = Value
+  if Value then
+   playDanceAntiAim()
+  else
+   stopDanceAntiAim()
+  end
+ end
+})
+_G.AntiRagdoll = false
+local function AntiRagdollLoop()
+ while _G.AntiRagdoll do
+  task.wait(0.2)
+  pcall(function()
+   local isRagdolled = RagdollModule.is_ragdolling.get()
+   if isRagdolled then
+    RagdollModule.is_ragdolling.set(false)
+    pcall(function() Net.send("end_ragdoll_early") end)
+    pcall(function() Net.send("clear_ragdoll") end)
+    pcall(function() Net.get("end_ragdoll_early") end)
+    pcall(function() Net.get("clear_ragdoll") end)
+   end
+  end)
+ end
+end
+MainTab:Toggle({
+ Title = "Anti Ragdoll",
+ Desc = "No ragdoll lol",
+ Flag = "AntiRagdoll",
+ Icon = "check",
+ Type = "Checkbox",
+ Value = false,
+ Callback = function(Value)
+  _G.AntiRagdoll = Value
+  if Value then task.spawn(AntiRagdollLoop) end
+ end
+})
+local func = {}
+local WasAntiLockEnabled = false
+local antiKillEnabled = false
+local isFlickering = false
+local underMapPos = nil
+local function getHRP()
+ local char = LocalPlayer.Character
+ if not char then return nil end
+ return char:FindFirstChild("HumanoidRootPart")
+end
+local function isDowned()
+ local ok, hum = pcall(function()
+  return CharModule and CharModule.get_hum and CharModule.get_hum()
+ end)
+ if not ok or not hum then
+  local char = LocalPlayer.Character
+  hum = char and char:FindFirstChildOfClass("Humanoid")
+ end
+ if not hum then return false end
+ if hum:GetAttribute("HasBeenDowned") then return true end
+ if hum:GetAttribute("IsDowned") then return true end
+ return false
+end
+local function teleportUnderground()
+ local root = getHRP()
+ if not root then return end
+ underMapPos = root.CFrame
+ local pos = root.Position
+ root.CFrame = CFrame.new(pos.X, pos.Y - 50, pos.Z)
+ underMapPos = root.CFrame
+end
+local function flickerAndMove()
+    if isFlickering then return end
+    isFlickering = true
+    task.spawn(function()
+        while isFlickering and antiKillEnabled and isDowned() do
+            local hum = CharModule and CharModule.get_hum and CharModule.get_hum()
+            if hum and hum.Health <= 0 then break end
+            local root = getHRP()
+            if root and underMapPos then
+                local angle = math.random() * math.pi * 2
+                local offset = Vector3.new(math.cos(angle), 0, math.sin(angle)) * 30
+                root.CFrame = CFrame.new(underMapPos.Position + offset)
+                task.wait(0.05)
+                root.CFrame = underMapPos
+            end
+            task.wait(0.1)
+        end
+        isFlickering = false
+    end)
+end
+func["AntiDied"] = function()
+ while true do
+  task.wait(0.15)
+  pcall(function()
+   if not antiKillEnabled then
+    if underMapPos then
+     local root = getHRP()
+     if root then
+      root.CFrame = underMapPos + Vector3.new(0, 55, 0)
+     end
+     underMapPos = nil
+    end
+    isFlickering = false
+    return
+   end
+   if antiKillEnabled then
+    if isDowned() then
+     if _G.AntiLock then
+      WasAntiLockEnabled = true
+      _G.AntiLock = false
+      pcall(stopDanceAntiAim)
+     end
+     local root = getHRP()
+     if root and not underMapPos then
+      teleportUnderground()
+     end
+     flickerAndMove()
+    else
+     if underMapPos then
+      local root = getHRP()
+      if root then
+       root.CFrame = underMapPos + Vector3.new(0, 55, 0)
+      end
+      underMapPos = nil
+     end
+     isFlickering = false
+     if WasAntiLockEnabled then
+      _G.AntiLock = true
+      pcall(playDanceAntiAim)
+      WasAntiLockEnabled = false
+     end
+    end
+   end
+  end)
+ end
+end
+MainTab:Divider()
+local EnabledSnapRunning = false
+local SnapThread = nil
+local YoffsetValue = 70
+func["EnabledSnap"] = function()
+ local basePosition = RootPart.Position
+ while EnabledSnapRunning do
+  task.wait()
+  if not EnabledSnapRunning then break end
+  local currentY = RootPart.Position.Y
+  local targetY = basePosition.Y - YoffsetValue
+  local deltaY = targetY - currentY
+  RootPart.CFrame = RootPart.CFrame * CFrame.new(0, deltaY, 0)
+ end
+end
+local function SetSnapState(value)
+ if EnabledSnapRunning == value then return end
+ EnabledSnapRunning = value
+ if value then
+  if not SnapThread then SnapThread = task.spawn(func["EnabledSnap"]) end
+ else
+  SnapThread = nil
+ end
+ MainTab:Get("UndergroundToggle"):SetValue(value)
+end
+MainTab:Toggle({
+ Title = "Underground",
+ Icon = "check",
+ Type = "Checkbox",
+ Value = false,
+ Flag = "UndergroundToggle",
+ Callback = function(value) SetSnapState(value) end
+})
+MainTab:Keybind({
+ Title = "Keybind",
+ Flag = "keybind",
+ Value = "G",
+ Callback = function() SetSnapState(not EnabledSnapRunning) end
+})
+MainTab:Slider({
+ Title = "Snap Height",
+ Flag = "snap_height",
+ Step = 1,
+ Value = { Min = 1, Max = 100, Default = 10 },
+ Callback = function(value) YoffsetValue = value end
+})
+local CombatTab = Window:Tab({ Title = "COMBAT", Icon = "swords" })
+_G.ESPZone_Enabled = true
+local ZoneCache = {}
+local ZONE_CACHE_TTL = 0.8
+local function IsInSafeZone(player)
+ if not player or not player.Character then return false end
+ local now = tick()
+ local cache = ZoneCache[player]
+ if cache and (now - cache.lastCheck) < ZONE_CACHE_TTL then return cache.inZone end
+ local char = player.Character
+ local hum = char:FindFirstChildOfClass("Humanoid")
+ local inZone = false
+ if player:GetAttribute("InSafeZone") == true
+  or player:GetAttribute("SafeZone") == true
+  or player:GetAttribute("IsInSafeZone") == true
+  or player:GetAttribute("InZone") == true
+  or char:GetAttribute("InSafeZone") == true
+  or char:GetAttribute("SafeZone") == true
+  or (hum and hum:GetAttribute("InSafeZone") == true)
+  or char:FindFirstChildOfClass("ForceField") then
+  inZone = true
+ end
+ ZoneCache[player] = { inZone = inZone, lastCheck = now }
+ return inZone
+end
+Players.PlayerRemoving:Connect(function(plr) ZoneCache[plr] = nil end)
+local ZoneLabels = {}
+local function UpdateZoneLabel(player)
+ if not _G.ESPZone_Enabled then
+  local lab = ZoneLabels[player]
+  if lab then pcall(function() lab:Destroy() end) ZoneLabels[player] = nil end
+  return
+ end
+ local char = player.Character
+ local head = char and char:FindFirstChild("Head")
+ if not head then return end
+ local inZone = IsInSafeZone(player)
+ local lab = ZoneLabels[player]
+ if inZone then
+  if not lab or not lab.Parent then
+   lab = Instance.new("BillboardGui")
+   lab.Name = "SavagexZoneLabel"
+   lab.Size = UDim2.new(0, 160, 0, 22)
+   lab.StudsOffset = Vector3.new(0, 2.6, 0)
+   lab.AlwaysOnTop = true
+   lab.MaxDistance = 400
+   lab.Parent = head
+   local txt = Instance.new("TextLabel")
+   txt.Name = "Label"
+   txt.BackgroundTransparency = 1
+   txt.Size = UDim2.new(1, 0, 1, 0)
+   txt.Font = Enum.Font.GothamBold
+   txt.TextSize = 13
+   txt.TextColor3 = Color3.fromRGB(0, 255, 90)
+   txt.TextStrokeTransparency = 0.3
+   txt.TextStrokeColor3 = Color3.new(0, 0, 0)
+   txt.Text = "(EN ZONA SEGURA)"
+   txt.Parent = lab
+   ZoneLabels[player] = lab
+  else
+   if lab.Parent ~= head then lab.Parent = head end
+   lab.Enabled = true
+  end
+ else
+  if lab then lab.Enabled = false end
+ end
+end
+task.spawn(function()
+ while true do
+  task.wait(0.8)
+  if _G.ESPZone_Enabled then
+   for _, plr in ipairs(Players:GetPlayers()) do
+    if plr ~= LocalPlayer then pcall(UpdateZoneLabel, plr) end
+   end
+  else
+   for plr, lab in pairs(ZoneLabels) do
+    pcall(function() lab:Destroy() end)
+    ZoneLabels[plr] = nil
+   end
+  end
+ end
+end)
+CombatTab:Section({ Title = "GUN" })
+_G.SilentAimEnabled = false
+_G.SilentAimFOV = 120
+_G.AimMoreSafeEnabled = false
+_G.AimPechoEnabled = false
+_G.SafeFriendUserIds = {}
+_G.ShowFOVCircle = true
+_G.ShowBulletTracer = true
+_G.AimMoreSafeShotCount = 0
+_G.AimMoreSafeLastAmmo = nil
+CombatTab:Toggle({ Title = "Silent Aim", Flag = "silent_aim", Icon = "crosshair", Type = "Checkbox", Value = false, Callback = function(v) _G.SilentAimEnabled = v if not v then _G.AimMoreSafeShotCount = 0 end end })
+CombatTab:Toggle({ Title = "AIM MORE SAFE", Flag = "aim_more_safe", Icon = "check", Type = "Checkbox", Value = false, Desc = "2 primeros pecho â resto cabeza | se reinicia al recargar", Callback = function(v) _G.AimMoreSafeEnabled = v _G.AimMoreSafeShotCount = 0 _G.AimMoreSafeLastAmmo = nil end })
+CombatTab:Toggle({ Title = "AIM PECHO", Flag = "aim_pecho", Icon = "check", Type = "Checkbox", Value = false, Desc = "Todas las balas al pecho | off = normal", Callback = function(v) _G.AimPechoEnabled = v end })
+CombatTab:Slider({ Title = "FOV", Flag = "gun_fov", Step = 1, Value = { Min = 50, Max = 500, Default = 120 }, Callback = function(v) _G.SilentAimFOV = v end })
+local safeFriendDropdown = nil
+local safeFriendLabels = {}
+local safeFriendLabelToPlayer = {}
+local function rebuildSafeFriendList()
+ safeFriendLabels = {}
+ safeFriendLabelToPlayer = {}
+ for _, plr in ipairs(Players:GetPlayers()) do
+  if plr ~= LocalPlayer then
+   local label = (plr.DisplayName and plr.DisplayName ~= "" and plr.DisplayName ~= plr.Name)
+    and (plr.DisplayName .. " (@" .. plr.Name .. ")")
+    or plr.Name
+   table.insert(safeFriendLabels, label)
+   safeFriendLabelToPlayer[label] = plr
+  end
+ end
+ table.sort(safeFriendLabels)
+ if safeFriendDropdown then
+  pcall(function()
+   if safeFriendDropdown.Refresh then
+    safeFriendDropdown:Refresh(safeFriendLabels)
+   elseif safeFriendDropdown.SetValues then
+    safeFriendDropdown:SetValues(safeFriendLabels)
+   elseif safeFriendDropdown.UpdateValues then
+    safeFriendDropdown:UpdateValues(safeFriendLabels)
+   end
+  end)
+ end
+ local valid = {}
+ for _, plr in ipairs(Players:GetPlayers()) do
+  valid[plr.UserId] = true
+ end
+ for uid in pairs(_G.SafeFriendUserIds) do
+  if not valid[uid] then
+   _G.SafeFriendUserIds[uid] = nil
+  end
+ end
+end
+rebuildSafeFriendList()
+safeFriendDropdown = CombatTab:Dropdown({
+ Title = "Safe Friends",
+ Flag = "safe_friends_select",
+ Desc = "Elige jugadores a los que Silent NO apuntara (multi, sin limite)",
+ Values = safeFriendLabels,
+ Default = {},
+ Multi = true,
+ AllowNone = true,
+ Callback = function(selected)
+  _G.SafeFriendUserIds = {}
+  if typeof(selected) == "table" then
+   for _, label in pairs(selected) do
+    if type(label) == "string" then
+     local plr = safeFriendLabelToPlayer[label]
+     if plr then
+      _G.SafeFriendUserIds[plr.UserId] = true
+     end
+    end
+   end
+  end
+ end
+})
+Players.PlayerAdded:Connect(function()
+ task.wait(0.3)
+ rebuildSafeFriendList()
+end)
+Players.PlayerRemoving:Connect(function(plr)
+ if _G.SafeFriendUserIds then
+  _G.SafeFriendUserIds[plr.UserId] = nil
+ end
+ task.wait(0.2)
+ rebuildSafeFriendList()
+end)
+CombatTab:Toggle({ Title = "Show FOV Circle", Flag = "show_fov", Icon = "circle", Type = "Checkbox", Value = true, Callback = function(v) _G.ShowFOVCircle = v end })
+task.spawn(function()
+ local LP, Cam = LocalPlayer, workspace.CurrentCamera
+ local GunLookup = {}
+ for _, n in ipairs({"P226","MP5","M24","Draco","Glock","Sawnoff","Uzi","G3","C9","Hunting Rifle","Anaconda","AK47","Remington","Double Barrel"}) do
+  GunLookup[n] = true
+ end
+ if CoreGui:FindFirstChild("SavagexFOVCircle") then CoreGui.SavagexFOVCircle:Destroy() end
+ local FOVGui = Instance.new("ScreenGui")
+ FOVGui.Name = "SavagexFOVCircle"
+ FOVGui.IgnoreGuiInset = true
+ FOVGui.ResetOnSpawn = false
+ FOVGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ FOVGui.DisplayOrder = 999
+ FOVGui.Parent = CoreGui
+ local FOVFrame = Instance.new("Frame")
+ FOVFrame.Name = "Circle"
+ FOVFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+ FOVFrame.BackgroundTransparency = 1
+ FOVFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+ FOVFrame.Size = UDim2.new(0, 240, 0, 240)
+ FOVFrame.Visible = false
+ FOVFrame.Parent = FOVGui
+ local FOVStroke = Instance.new("UIStroke")
+ FOVStroke.Name = "Stroke"
+ FOVStroke.Color = Color3.fromRGB(255, 255, 255)
+ FOVStroke.Thickness = 2.0
+ FOVStroke.Transparency = 0
+ FOVStroke.Parent = FOVFrame
+ local FOVCorner = Instance.new("UICorner")
+ FOVCorner.CornerRadius = UDim.new(1, 0)
+ FOVCorner.Parent = FOVFrame
+ local fovDrawing, line, diamonds = nil, nil, {}
+ pcall(function()
+  fovDrawing = safeDrawingNew("Circle")
+  if fovDrawing then
+   fovDrawing.Color = Color3.fromRGB(255, 255, 255)
+   fovDrawing.Thickness = 2
+   fovDrawing.NumSides = 64
+   fovDrawing.Filled = false
+   fovDrawing.Visible = false
+   fovDrawing.Transparency = 0
+  end
+  line = safeDrawingNew("Line")
+  if line then
+   line.Color = Color3.fromRGB(255, 40, 40)
+   line.Thickness = 2.2
+   line.Visible = false
+  end
+  for i = ... (Tiempo restante: 76 KB)
